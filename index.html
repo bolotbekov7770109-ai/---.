@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Макаронная Лавка • Каракол</title>
+  <style>
+    :root {
+      --pink: #ff69b4;
+      --dark-pink: #db2777;
+      --light-pink: #ffe4f3;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(#fff9fb, #ffe4f3);
+      color: #333;
+      line-height: 1.6;
+    }
+    header {
+      background: rgba(255,255,255,0.98);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 15px rgba(255,105,180,0.2);
+    }
+    nav {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo { font-size: 2.5rem; font-weight: bold; color: var(--dark-pink); }
+    .nav-links a {
+      margin-left: 2rem;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-links a:hover { color: var(--dark-pink); }
+
+    .hero {
+      text-align: center;
+      padding: 160px 20px 120px;
+      background: linear-gradient(rgba(255,105,180,0.15), rgba(255,182,193,0.2));
+    }
+    .hero h1 { font-size: 4rem; color: var(--dark-pink); }
+
+    .section { padding: 100px 0; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+    h2 { text-align: center; font-size: 3.2rem; color: var(--dark-pink); margin-bottom: 60px; }
+
+    .filters {
+      text-align: center;
+      margin-bottom: 50px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+    .filter-btn {
+      padding: 12px 26px;
+      border: 2px solid var(--dark-pink);
+      background: white;
+      color: var(--dark-pink);
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--dark-pink);
+      color: white;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 35px;
+    }
+    .card {
+      background: white;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(255,105,180,0.2);
+      transition: all 0.4s ease;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeUp 0.8s forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card:hover {
+      transform: translateY(-20px) scale(1.04);
+      box-shadow: 0 30px 60px rgba(255,105,180,0.35);
+    }
+    .card img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+    }
+    .card-body { padding: 25px; text-align: center; }
+    .price { font-size: 1.8rem; font-weight: bold; color: var(--dark-pink); margin: 15px 0; }
+
+    .btn {
+      padding: 14px 36px;
+      background: var(--dark-pink);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn:hover { background: #c02669; transform: scale(1.08); }
+
+    /* Корзина */
+    .cart-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--dark-pink);
+      color: white;
+      padding: 16px 26px;
+      border-radius: 50px;
+      box-shadow: 0 10px 30px rgba(219,39,119,0.4);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .cart-count {
+      background: white;
+      color: var(--dark-pink);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Модальные окна */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 30px;
+      width: 92%;
+      max-width: 560px;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+    .close { float: right; font-size: 2.8rem; cursor: pointer; color: #999; }
+
+    .review-card {
+      background: white;
+      padding: 30px;
+      border-radius: 28px;
+      box-shadow: 0 15px 40px rgba(255,105,180,0.15);
+      margin-bottom: 30px;
+    }
+    .stars { color: #ffc107; font-size: 1.6rem; }
+
+    footer {
+      background: rgba(255,255,255,0.98);
+      text-align: center;
+      padding: 80px 20px 50px;
+    }
+    .social a { font-size: 2.8rem; margin: 0 30px; color: var(--dark-pink); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo">🍭 Макаронная Лавка</div>
+      <div class="nav-links">
+        <a href="#home">Главная</a>
+        <a href="#macarons">Макаронсы</a>
+        <a href="#bubble">Bubble Tea</a>
+        <a href="#combo">Комбо</a>
+        <a href="#reviews">Отзывы</a>
+      </div>
+    </nav>
+  </header>
+
+  <section id="home" class="hero">
+    <h1>Макаронная Лавка</h1>
+    <p>Почти все вкусы мира • Свежие десерты • Доставка по Районам Иссык-Кулья</p>
+    <button class="btn" onclick="showOrderForm()" style="margin-top:40px; font-size:1.3rem;">Оформить заказ</button>
+  </section>
+
+  <!-- Макаронсы -->
+  <div id="macarons" class="section">
+    <div class="container">
+      <h2>Макаронсы — 50+ видов</h2>
+      
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all" onclick="filterMacarons('all')">Все</button>
+        <button class="filter-btn" data-filter="fruit" onclick="filterMacarons('fruit')">Фруктовые</button>
+        <button class="filter-btn" data-filter="choco" onclick="filterMacarons('choco')">Шоколадные</button>
+        <button class="filter-btn" data-filter="floral" onclick="filterMacarons('floral')">Цветочные</button>
+        <button class="filter-btn" data-filter="classic" onclick="filterMacarons('classic')">Классические</button>
+      </div>
+
+      <div class="products" id="macarons-grid"></div>
+    </div>
+  </div>
+
+  <!-- Bubble Tea -->
+  <div id="bubble" class="section" style="background:#fff0f8;">
+    <div class="container">
+      <h2>Bubble Tea — популярные вкусы</h2>
+      <div class="products" id="bubble-grid"></div>
+    </div>
+  </div>
+
+  <!-- Комбо -->
+  <div id="combo" class="section">
+    <div class="container">
+      <h2>Комбо наборы со скидками</h2>
+      <div class="combo">
+        <img src="./20.jpeg" alt="6 шт">
+        <h3>Коробка 6 шт — 15% скидка</h3>
+        <p style="font-size:2.2rem; color:#c02669;">1 050 сом</p>
+        <button class="btn" onclick="addCombo(6,1050)">В корзину</button>
+      </div>
+      <div class="combo">
+        <img src="./21.jpeg" alt="12 шт">
+        <h3>Коробка 12 шт — 20% скидка</h3>
+        <p style="font-size:2.2rem; color:#c02669;">2 050 сом</p>
+        <button class="btn" onclick="addCombo(12,2050)">В корзину</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Отзывы + форма добавления отзыва -->
+  <div id="reviews" class="section">
+    <div class="container">
+      <h2>Отзывы клиентов</h2>
+      
+      <div id="reviews-list"></div>
+
+      <!-- Форма добавления отзыва -->
+      <div style="background:white; padding:40px; border-radius:28px; margin-top:60px; box-shadow:0 15px 40px rgba(255,105,180,0.2);">
+        <h3 style="text-align:center; color:var(--dark-pink);">Оставьте свой отзыв</h3>
+        <form onsubmit="addReview(event)">
+          <input type="text" id="review-name" placeholder="Ваше имя" required style="width:100%; padding:12px; margin:10px 0; border-radius:12px; border:2px solid #ddd;">
+          <textarea id="review-text" rows="4" placeholder="Напишите отзыв..." required style="width:100%; padding:12px; margin:10px 0; border-radius:12px; border:2px solid #ddd;"></textarea>
+          
+          <div style="margin:15px 0;">
+            <label>Оценка: </label>
+            <select id="review-rating" style="padding:8px; border-radius:8px;">
+              <option value="5">★★★★★ (5)</option>
+              <option value="4">★★★★☆ (4)</option>
+              <option value="3">★★★☆☆ (3)</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn" style="width:100%;">Отправить отзыв</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Плавающая кнопка корзины -->
+  <div class="cart-btn" onclick="showCart()">
+    🛒 Корзина <span class="cart-count" id="cart-count">0</span>
+  </div>
+
+  <!-- Модальное окно корзины -->
+  <div class="modal" id="cartModal">
+    <div class="modal-content">
+      <span class="close" onclick="hideCart()">×</span>
+      <h2 style="color:var(--dark-pink); text-align:center;">Ваша корзина</h2>
+      <div id="cart-items"></div>
+      <h3 style="margin:20px 0; text-align:right;">Итого: <span id="cart-total">0</span> сом</h3>
+      <button class="btn" onclick="showOrderFormFromCart()" style="width:100%;">Оформить заказ</button>
+    </div>
+  </div>
+
+  <!-- Форма заказа -->
+  <div class="modal" id="orderModal">
+    <div class="modal-content">
+      <span class="close" onclick="hideOrderForm()">×</span>
+      <h2 style="color:var(--dark-pink); text-align:center;">Оформить заказ</h2>
+      <form onsubmit="submitOrder(event)">
+        <input type="text" id="name" placeholder="Ваше имя" required>
+        <input type="tel" id="phone" placeholder="Телефон (+996 ...)" required>
+        <select id="region" onchange="updateDistricts()" required>
+          <option value="">Каракол</option>
+          <option value="bishkek">Ак-Суу</option>
+          <option value="issykkul" selected>Джети-Огуз</option>
+        </select>
+        <select id="district" required></select>
+        <input type="text" id="address" placeholder="Адрес доставки" required>
+        <textarea id="comment" rows="4" placeholder="Комментарий (какие вкусы выбрать)"></textarea>
+        <p style="margin:15px 0; font-weight:bold;">Итого: <span id="total-price">0</span> сом</p>
+        <button type="submit" class="btn" style="width:100%; padding:18px; font-size:1.2rem;">Подтвердить заказ</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>Макаронная Лавка  Иссык-Куль</strong> ✨</p>
+    <div class="social">
+      <a href="https://www.instagram.com/bo1otbekov.211?igsh=MXB1a3p3ZGx3enMzaA==" target="_blank">📸 Instagram</a>
+      <a href="https://t.me/+axA8XjbW7cw5ZDYy">✈️ Telegram</a>
+    </div>
+    <p style="margin-top:30px;">📞 +996 702 909 910</p>
+  </footer>
+
+  <script>
+    let cart = [];
+    let reviews = JSON.parse(localStorage.getItem('reviews')) || [
+      { name: "Айгерим С.", text: "Огромный выбор вкусов! Макаронсы свежие, бабл ти очень вкусный.", rating: "5" },
+      { name: "Эльмира К.", text: "Лучшие макаронсы в Бишкеке. на Джети-Огуз отличная!", rating: "5" }
+    ];
+
+    const macarons = [
+      { name: "Классическая Ваниль", price: 190, img: "1.jpeg", category: "classic" },
+      { name: "Фисташка", price: 225, img: "2.jpeg", category: "choco" },
+      { name: "Шоколад", price: 200, img: "3.jpeg", category: "choco" },
+      { name: "Малина", price: 210, img: "4.jpeg", category: "fruit" },
+      { name: "Соленая Карамель", price: 230, img: "5.jpeg", category: "classic" },
+      { name: "Лимон", price: 195, img: "6.jpeg", category: "fruit" },
+      { name: "Роза", price: 220, img: "7.jpeg", category: "floral" },
+      { name: "Клубника", price: 205, img: "8.jpeg", category: "fruit" },
+      { name: "Матча", price: 230, img: "9.jpeg", category: "floral" },
+      { name: "Oreo", price: 235, img: "10.jpeg", category: "choco" },
+      { name: "Манго-Маракуйя", price: 245, img: "11.jpeg", category: "fruit" },
+      { name: "Лаванда-Мед", price: 240, img: "12.jpeg", category: "floral" },
+      { name: "Тирамису", price: 235, img: "13.jpeg", category: "classic" },
+      { name: "Сникерс", price: 245, img: "14.jpeg", category: "choco" },
+      { name: "Дубайский Шоколад", price: 255, img: "15.jpeg", category: "choco" },
+      { name: "Cotton Candy", price: 215, img: "16.jpeg", category: "floral" },
+      { name: "Red Velvet", price: 235, img: "17.jpeg", category: "choco" },
+      { name: "Passion Fruit", price: 245, img: "18.jpeg", category: "fruit" }
+    ];
+
+    const bubbleTeas = [
+      { name: "Классический Молочный Чай", price: 180, img: "23.jpeg" },
+      { name: "Таро Бабл Ти", price: 200, img: "24.jpeg" },
+      { name: "Коричневый Сахар", price: 220, img: "25.jpeg" },
+      { name: "Манго", price: 190, img: "26.jpeg" },
+      { name: "Матча Латте", price: 210, img: "27.jpeg" },
+      { name: "Клубника", price: 185, img: "28.jpeg" },
+      { name: "Passion Fruit", price: 195, img: "29.jpeg" },
+      { name: "Кокос", price: 190, img: "30.jpeg" }
+    ];
+
+    function createCard(item) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${item.img}" alt="${item.name}">
+        <div class="card-body">
+          <h3>${item.name}</h3>
+          <div class="price">${item.price} сом</div>
+          <button class="btn" onclick="addToCart('${item.name}', ${item.price})">В корзину</button>
+        </div>
+      `;
+      return card;
+    }
+
+    window.onload = () => {
+      document.getElementById('macarons-grid').append(...macarons.map(createCard));
+      document.getElementById('bubble-grid').append(...bubbleTeas.map(createCard));
+      renderReviews();
+    };
+
+    function filterMacarons(category) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      const grid = document.getElementById('macarons-grid');
+      grid.innerHTML = '';
+
+      if (category === 'all') {
+        macarons.forEach(item => grid.appendChild(createCard(item)));
+      } else {
+        const filtered = macarons.filter(item => item.category === category);
+        filtered.forEach(item => grid.appendChild(createCard(item)));
+      }
+    }
+
+    function addToCart(name, price) {
+      cart.push({name, price});
+      updateCartCount();
+      alert(`✅ ${name} добавлен в корзину`);
+    }
+
+    function addCombo(count, price) {
+      cart.push({name: `Комбо коробка ${count} шт`, price});
+      updateCartCount();
+      alert(`✅ Комбо ${count} шт добавлено`);
+    }
+
+    function updateCartCount() {
+      document.getElementById('cart-count').textContent = cart.length;
+    }
+
+    function showCart() {
+      if (cart.length === 0) {
+        alert("Корзина пуста");
+        return;
+      }
+
+      let html = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        total += item.price;
+        html += `
+          <div class="cart-item" style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #eee;">
+            <span>${item.name} — ${item.price} сом</span>
+            <span class="remove-btn" onclick="removeFromCart(${index})" style="color:#e11d48; cursor:pointer;">Удалить</span>
+          </div>
+        `;
+      });
+
+      document.getElementById('cart-items').innerHTML = html;
+      document.getElementById('cart-total').textContent = total;
+      document.getElementById('cartModal').style.display = 'flex';
+    }
+
+    function hideCart() {
+      document.getElementById('cartModal').style.display = 'none';
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartCount();
+      showCart();
+    }
+
+    function showOrderFormFromCart() {
+      hideCart();
+      showOrderForm();
+    }
+
+    // Форма заказа
+    function showOrderForm() {
+      if (cart.length === 0) {
+        alert("Корзина пуста!");
+        return;
+      }
+      let total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById('total-price').textContent = total;
+      document.getElementById('orderModal').style.display = 'flex';
+    }
+
+    function hideOrderForm() {
+      document.getElementById('orderModal').style.display = 'none';
+    }
+
+    function updateDistricts() {
+      const region = document.getElementById('region').value;
+      const districtSelect = document.getElementById('district');
+      districtSelect.innerHTML = '<option value="">Выберите район</option>';
+      if (region === 'bishkek') {
+        ['Ленинский','Октябрьский','Первомайский','Свердловский'].forEach(d => {
+          const opt = document.createElement('option'); opt.value = d; opt.textContent = d;
+          districtSelect.appendChild(opt);
+        });
+      } else if (region === 'issykkul') {
+        ['Каракол','Чолпон-Ата','Балыкчы','Ак-Суу','Джети-Огуз'].forEach(d => {
+          const opt = document.createElement('option'); opt.value = d; opt.textContent = d;
+          districtSelect.appendChild(opt);
+        });
+      }
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+      alert('🎉 Спасибо за заказ! Мы свяжемся с вами в ближайшее время.');
+      cart = [];
+      updateCartCount();
+      hideOrderForm();
+    }
+
+    // Добавление отзыва
+    function addReview(e) {
+      e.preventDefault();
+      const name = document.getElementById('review-name').value;
+      const text = document.getElementById('review-text').value;
+      const rating = document.getElementById('review-rating').value;
+
+      if (!name || !text) return;
+
+      reviews.unshift({ name, text, rating });
+      localStorage.setItem('reviews', JSON.stringify(reviews));
+      renderReviews();
+
+      // Очистка формы
+      document.getElementById('review-name').value = '';
+      document.getElementById('review-text').value = '';
+
+      alert("Спасибо за ваш отзыв! ❤️");
+    }
+
+    function renderReviews() {
+      const container = document.getElementById('reviews-list');
+      container.innerHTML = '';
+      reviews.forEach(review => {
+        const div = document.createElement('div');
+        div.className = 'review-card';
+        div.innerHTML = `
+          <div class="stars">${'★'.repeat(review.rating)}</div>
+          <p>"${review.text}"</p>
+          <strong>${review.name}</strong>
+        `;
+        container.appendChild(div);
+      });
+    }
+  </script>
+</body>
+</html>
